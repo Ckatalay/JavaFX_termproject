@@ -18,6 +18,11 @@ public class HelloApplication extends Application {
     private int scoreText = 0;
     private double opacity = 1;
     private Label lbl;
+    private Label timelbl;
+    private int totalMinute = 0;
+    private int totalSecond = 5;
+    private int currentMinute;
+    private int currentSecond;
     final int width = 800;
     final int height = 600;
 
@@ -30,10 +35,17 @@ public class HelloApplication extends Application {
 
         var root = new StackPane();
 
+
+
+        timelbl = new Label("Time: " + Integer.toString(currentMinute) + "." + Integer.toString(currentSecond));
+        timelbl.setFont(Font.font(24));
+        root.getChildren().add(timelbl);
+        root.setAlignment(Pos.TOP_LEFT);
+
         lbl = new Label("Score: " + Integer.toString(scoreText));
         lbl.setFont(Font.font(24));
-        root.getChildren().add(lbl);
-        root.setAlignment(Pos.TOP_CENTER);
+        //root.getChildren().add(lbl);
+        //root.setAlignment(Pos.TOP_CENTER);
 
         AnimationTimer timer = new MyTimer();
         timer.start();
@@ -46,15 +58,32 @@ public class HelloApplication extends Application {
     }
 
     private class MyTimer extends AnimationTimer {
-
+        int oldMinute = LocalTime.now().getMinute();
+        int oldSecond = LocalTime.now().getSecond();
         @Override
         public void handle(long now) {
             doHandle();
         }
 
         private void doHandle() {
-            LocalTime myObj = LocalTime.now();
-            System.out.println(myObj);//208rh2fueqwincwe8fucwdn
+            currentMinute = LocalTime.now().getMinute();
+            currentSecond = LocalTime.now().getSecond();
+
+            if (currentSecond != oldSecond) {
+                if(totalSecond == 0){
+                    if(totalMinute == 0){
+                        stop();
+                    } else {
+                        totalMinute -= 1;
+                        totalSecond = 59;
+                    }
+
+                } else {
+                    totalSecond -= 1;
+                }
+                timelbl.setText("Time: " + Integer.toString(totalMinute) + "." + Integer.toString(totalSecond));
+            }
+
             scoreText++;
             lbl.setText("Score: " + Integer.toString(scoreText));
             lbl.opacityProperty().set(opacity);
@@ -64,6 +93,9 @@ public class HelloApplication extends Application {
                 stop();
                 System.out.println("Animation stopped");
             }
+
+            oldMinute = currentMinute;
+            oldSecond = currentSecond;
         }
     }
 }
