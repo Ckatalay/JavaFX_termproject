@@ -8,21 +8,20 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
+
 import java.time.LocalTime;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class HelloApplication extends Application {
     private int scoreText = 0;
     private double opacity = 1;
-    private Label lbl;
-    private Label timelbl;
-    private int totalMinute = 0;
-    private int totalSecond = 5;
-    private int currentMinute;
-    private int currentSecond;
+    private Label timeRemainingLabel;
+    int oldMinute = LocalTime.now().getMinute();
+    int oldSecond = LocalTime.now().getSecond();
+    private int totalMinute = 3;
+    private int totalSecond = 0;
+    private int localDeviceMinute;
+    private int localDeviceSecond;
     final int width = 800;
     final int height = 600;
 
@@ -32,25 +31,25 @@ public class HelloApplication extends Application {
     }
 
     private void initUI(Stage stage) {
-
+        Label scoreLabel;
         var root = new StackPane();
 
+        scoreLabel = new Label("Score: " + scoreText);
+        scoreLabel.setFont(Font.font(24));
 
+        timeRemainingLabel = new Label("Time: " + localDeviceMinute + "." + localDeviceSecond);
+        timeRemainingLabel.setFont(Font.font(24));
 
-        timelbl = new Label("Time: " + Integer.toString(currentMinute) + "." + Integer.toString(currentSecond));
-        timelbl.setFont(Font.font(24));
-        root.getChildren().add(timelbl);
-        root.setAlignment(Pos.TOP_LEFT);
+        VBox hudTop = new VBox(15); //15 boslug
+        hudTop.setAlignment(Pos.TOP_CENTER);
+        hudTop.getChildren().addAll(scoreLabel, timeRemainingLabel);
 
-        lbl = new Label("Score: " + Integer.toString(scoreText));
-        lbl.setFont(Font.font(24));
-        //root.getChildren().add(lbl);
-        //root.setAlignment(Pos.TOP_CENTER);
+        root.getChildren().add(hudTop);
 
         AnimationTimer timer = new MyTimer();
         timer.start();
 
-        var scene = new Scene(root, 300, 250);
+        var scene = new Scene(root, 500, 500);
 
         stage.setTitle("AnimationTimer");
         stage.setScene(scene);
@@ -58,35 +57,18 @@ public class HelloApplication extends Application {
     }
 
     private class MyTimer extends AnimationTimer {
-        int oldMinute = LocalTime.now().getMinute();
-        int oldSecond = LocalTime.now().getSecond();
+
         @Override
         public void handle(long now) {
             doHandle();
         }
 
         private void doHandle() {
-            currentMinute = LocalTime.now().getMinute();
-            currentSecond = LocalTime.now().getSecond();
 
-            if (currentSecond != oldSecond) {
-                if(totalSecond == 0){
-                    if(totalMinute == 0){
-                        stop();
-                    } else {
-                        totalMinute -= 1;
-                        totalSecond = 59;
-                    }
+            timeRemainingLabelHandler();
 
-                } else {
-                    totalSecond -= 1;
-                }
-                timelbl.setText("Time: " + Integer.toString(totalMinute) + "." + Integer.toString(totalSecond));
-            }
-
-            scoreText++;
-            lbl.setText("Score: " + Integer.toString(scoreText));
-            lbl.opacityProperty().set(opacity);
+            //scoreText++;
+            //timeRemainingLabel.opacityProperty().set(opacity);
 
             if (opacity <= 0) {
 
@@ -94,9 +76,33 @@ public class HelloApplication extends Application {
                 System.out.println("Animation stopped");
             }
 
-            oldMinute = currentMinute;
-            oldSecond = currentSecond;
+
         }
     }
+
+    private void timeRemainingLabelHandler(){
+
+        localDeviceMinute = LocalTime.now().getMinute();
+        localDeviceSecond = LocalTime.now().getSecond();
+
+        if (localDeviceSecond != oldSecond) {
+            if(totalSecond == 0){
+                if(totalMinute == 0){
+                    System.exit(1);
+                } else {
+                    totalMinute -= 1;
+                    totalSecond = 59;
+                }
+
+            } else {
+                totalSecond -= 1;
+            }
+            timeRemainingLabel.setText("Time: " + Integer.toString(totalMinute) + "." + Integer.toString(totalSecond));
+        }
+
+        oldMinute = localDeviceMinute;
+        oldSecond = localDeviceSecond;
+    }
+
 }
 
